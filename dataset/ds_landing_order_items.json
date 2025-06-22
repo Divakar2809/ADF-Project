@@ -2,7 +2,7 @@
 	"name": "ds_landing_order_items",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_landing_order_items",
+			"referenceName": "ls_landing",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],

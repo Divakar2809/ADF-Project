@@ -2,7 +2,7 @@
 	"name": "ds_bronze_order_items",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_bronze_order_items",
+			"referenceName": "ls_bronze",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
