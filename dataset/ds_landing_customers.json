@@ -2,16 +2,16 @@
 	"name": "ds_landing_customers",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "ls_bronze",
+			"referenceName": "ls_landing",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],
 		"type": "Json",
 		"typeProperties": {
 			"location": {
-				"type": "AzureBlobFSLocation",
+				"type": "AzureBlobStorageLocation",
 				"fileName": "customers.json",
-				"fileSystem": "bronze"
+				"container": "landing"
 			}
 		},
 		"schema": {}
