@@ -5,6 +5,9 @@
 			"referenceName": "ls_bronze",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "order_items"
+		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {

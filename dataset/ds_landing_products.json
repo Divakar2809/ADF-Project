@@ -5,6 +5,9 @@
 			"referenceName": "ls_landing",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "products"
+		},
 		"annotations": [],
 		"type": "Json",
 		"typeProperties": {
