@@ -76,7 +76,7 @@
 					"source": {
 						"type": "JsonSource",
 						"storeSettings": {
-							"type": "AzureBlobFSReadSettings",
+							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"enablePartitionDiscovery": false
 						},
@@ -87,7 +87,7 @@
 					"sink": {
 						"type": "JsonSink",
 						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
+							"type": "AzureBlobFSWriteSettings"
 						},
 						"formatSettings": {
 							"type": "JsonWriteSettings"
@@ -97,13 +97,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "ds_bronze_products",
+						"referenceName": "ds_landing_products",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "ds_landing_products",
+						"referenceName": "ds_bronze_products",
 						"type": "DatasetReference"
 					}
 				]
