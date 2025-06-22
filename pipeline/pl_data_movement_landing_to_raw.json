@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "order_items_copy_data_from_landing_to_raw",
+				"name": "order_items_copy_data_from_landing_to_bronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -61,7 +61,7 @@
 				]
 			},
 			{
-				"name": "products_copy_data_from_landing_to_raw_copy1",
+				"name": "products_copy_data_from_landing_to_bronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -109,7 +109,7 @@
 				]
 			},
 			{
-				"name": "orders_copy_data_from_landing_to_raw_copy2",
+				"name": "orders_copy_data_from_landing_to_bronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -165,7 +165,7 @@
 				]
 			},
 			{
-				"name": "customers_copy_data_from_landing_to_raw_copy3",
+				"name": "customers_copy_data_from_landing_to_bronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -213,7 +213,7 @@
 				]
 			},
 			{
-				"name": "stores_copy_data_from_landing_to_raw_copy2_copy1",
+				"name": "stores_copy_data_from_landing_to_bronze",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
