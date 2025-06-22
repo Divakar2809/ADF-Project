@@ -1,0 +1,19 @@
+{
+	"name": "ds_bronze_stores",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_bronze",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "stores.json",
+				"fileSystem": "bronze"
+			}
+		},
+		"schema": {}
+	}
+}
