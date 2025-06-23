@@ -31,6 +31,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "storesSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_order_items",
+						"type": "DatasetReference"
+					},
+					"name": "orderItemSource"
 				}
 			],
 			"sinks": [
@@ -61,6 +68,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "storesTarget"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_cleansed_order_items",
+						"type": "DatasetReference"
+					},
+					"name": "orderItemTarget"
 				}
 			],
 			"transformations": [
@@ -95,6 +109,15 @@
 				},
 				{
 					"name": "selectionOfCol"
+				},
+				{
+					"name": "Columnaddon"
+				},
+				{
+					"name": "typConvertion"
+				},
+				{
+					"name": "select1"
 				}
 			],
 			"scriptLines": [
@@ -138,6 +161,16 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     documentForm: 'documentPerLine') ~> storesSource",
+				"source(output(",
+				"          ORDER_ID as string,",
+				"          LINE_ITEM_ID as string,",
+				"          PRODUCT_ID as string,",
+				"          UNIT_PRICE as string,",
+				"          QUANTITY as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false) ~> orderItemSource",
 				"ordersSource derive(ORDER_DATE = toDate(ORDER_DATETIME),",
 				"          UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumns",
 				"derivedColumns select(mapColumn(",
@@ -183,6 +216,23 @@
 				"     ),",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> selectionOfCol",
+				"orderItemSource derive(UPDATED_TIMESTAMP = currentUTC()) ~> Columnaddon",
+				"Columnaddon cast(output(",
+				"          ORDER_ID as integer,",
+				"          PRODUCT_ID as integer,",
+				"          UNIT_PRICE as double,",
+				"          QUANTITY as integer",
+				"     ),",
+				"     errors: true) ~> typConvertion",
+				"typConvertion select(mapColumn(",
+				"          ORDER_ID,",
+				"          PRODUCT_ID,",
+				"          UNIT_PRICE,",
+				"          QUANTITY,",
+				"          UPDATED_TIMESTAMP",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
 				"datatypeconversion sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
@@ -214,7 +264,15 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> storesTarget"
+				"     skipDuplicateMapOutputs: true) ~> storesTarget",
+				"select1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> orderItemTarget"
 			]
 		}
 	}
