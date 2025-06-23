@@ -10,6 +10,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "ordersSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_customers",
+						"type": "DatasetReference"
+					},
+					"name": "customersSource"
 				}
 			],
 			"sinks": [
@@ -19,6 +26,9 @@
 						"type": "DatasetReference"
 					},
 					"name": "ordersTarget"
+				},
+				{
+					"name": "targetCustomers"
 				}
 			],
 			"transformations": [
@@ -31,6 +41,13 @@
 				},
 				{
 					"name": "datatypeconversion"
+				},
+				{
+					"name": "derivedColumn",
+					"description": "adding a new column updated timestamp"
+				},
+				{
+					"name": "datatypechangeforcustid"
 				}
 			],
 			"scriptLines": [
@@ -45,6 +62,15 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> ordersSource",
+				"source(output(",
+				"          CUSTOMER_ID as string,",
+				"          FULL_NAME as string,",
+				"          EMAIL_ADDRESS as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> customersSource",
 				"ordersSource derive(ORDER_DATE = toDate(ORDER_DATETIME),",
 				"          UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumns",
 				"derivedColumns select(mapColumn(",
@@ -63,6 +89,11 @@
 				"          STORE_ID as integer",
 				"     ),",
 				"     errors: true) ~> datatypeconversion",
+				"customersSource derive(UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumn",
+				"derivedColumn cast(output(",
+				"          CUSTOMER_ID as integer",
+				"     ),",
+				"     errors: true) ~> datatypechangeforcustid",
 				"datatypeconversion sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
@@ -70,7 +101,11 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ordersTarget"
+				"     skipDuplicateMapOutputs: true) ~> ordersTarget",
+				"datatypechangeforcustid sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> targetCustomers"
 			]
 		}
 	}
