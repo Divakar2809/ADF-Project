@@ -28,6 +28,10 @@
 					"name": "ordersTarget"
 				},
 				{
+					"dataset": {
+						"referenceName": "ds_cleansed_customers",
+						"type": "DatasetReference"
+					},
 					"name": "targetCustomers"
 				}
 			],
@@ -104,6 +108,10 @@
 				"     skipDuplicateMapOutputs: true) ~> ordersTarget",
 				"datatypechangeforcustid sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
 				"     skipDuplicateMapOutputs: true) ~> targetCustomers"
 			]
