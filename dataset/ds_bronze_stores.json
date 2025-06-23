@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "stores"
+			"name": "Bronze/stores"
 		},
 		"annotations": [],
 		"type": "Json",

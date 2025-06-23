@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "order_items"
+			"name": "Landing/order_items"
 		},
 		"annotations": [],
 		"type": "DelimitedText",

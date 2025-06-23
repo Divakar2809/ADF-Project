@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "orders"
+			"name": "Bronze/orders"
 		},
 		"annotations": [],
 		"type": "Parquet",

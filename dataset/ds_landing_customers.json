@@ -6,7 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"folder": {
-			"name": "customers"
+			"name": "Landing/customers"
 		},
 		"annotations": [],
 		"type": "Json",
