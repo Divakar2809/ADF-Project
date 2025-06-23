@@ -17,6 +17,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "customersSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_bronze_products",
+						"type": "DatasetReference"
+					},
+					"name": "productsSource"
 				}
 			],
 			"sinks": [
@@ -33,6 +40,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "targetCustomers"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_cleansed_products",
+						"type": "DatasetReference"
+					},
+					"name": "productsTarget"
 				}
 			],
 			"transformations": [
@@ -52,6 +66,12 @@
 				},
 				{
 					"name": "datatypechangeforcustid"
+				},
+				{
+					"name": "dtypeConvertion"
+				},
+				{
+					"name": "updatedtimestamp"
 				}
 			],
 			"scriptLines": [
@@ -75,6 +95,15 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     documentForm: 'documentPerLine') ~> customersSource",
+				"source(output(",
+				"          PRODUCT_ID as string,",
+				"          PRODUCT_NAME as string,",
+				"          UNIT_PRICE as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'documentPerLine') ~> productsSource",
 				"ordersSource derive(ORDER_DATE = toDate(ORDER_DATETIME),",
 				"          UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumns",
 				"derivedColumns select(mapColumn(",
@@ -98,6 +127,12 @@
 				"          CUSTOMER_ID as integer",
 				"     ),",
 				"     errors: true) ~> datatypechangeforcustid",
+				"productsSource cast(output(",
+				"          PRODUCT_ID as integer,",
+				"          UNIT_PRICE as double",
+				"     ),",
+				"     errors: true) ~> dtypeConvertion",
+				"dtypeConvertion derive(UPDATED_TIMESTAMP = currentUTC()) ~> updatedtimestamp",
 				"datatypeconversion sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     format: 'parquet',",
@@ -113,7 +148,15 @@
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> targetCustomers"
+				"     skipDuplicateMapOutputs: true) ~> targetCustomers",
+				"updatedtimestamp sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> productsTarget"
 			]
 		}
 	}
