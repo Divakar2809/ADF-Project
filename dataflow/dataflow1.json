@@ -9,14 +9,28 @@
 						"referenceName": "ds_bronze_orders",
 						"type": "DatasetReference"
 					},
-					"name": "orders"
+					"name": "ordersSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_cleansed_orders",
+						"type": "DatasetReference"
+					},
+					"name": "ordersTarget"
+				}
+			],
 			"transformations": [
 				{
 					"name": "derivedColumns",
 					"description": "changing order_datetime to order_date and add the new column update_timestamp"
+				},
+				{
+					"name": "Selection"
+				},
+				{
+					"name": "datatypeconversion"
 				}
 			],
 			"scriptLines": [
@@ -30,8 +44,33 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> orders",
-				"orders derive() ~> derivedColumns"
+				"     format: 'parquet') ~> ordersSource",
+				"ordersSource derive(ORDER_DATE = toDate(ORDER_DATETIME),",
+				"          UPDATED_TIMESTAMP = currentUTC()) ~> derivedColumns",
+				"derivedColumns select(mapColumn(",
+				"          ORDER_ID,",
+				"          ORDER_DATE,",
+				"          CUSTOMER_ID,",
+				"          ORDER_STATUS,",
+				"          STORE_ID,",
+				"          UPDATED_TIMESTAMP",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> Selection",
+				"Selection cast(output(",
+				"          ORDER_ID as integer,",
+				"          CUSTOMER_ID as integer,",
+				"          STORE_ID as integer",
+				"     ),",
+				"     errors: true) ~> datatypeconversion",
+				"datatypeconversion sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ordersTarget"
 			]
 		}
 	}

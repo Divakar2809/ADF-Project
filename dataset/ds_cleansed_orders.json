@@ -1,5 +1,5 @@
 {
-	"name": "ds_parquet",
+	"name": "ds_cleansed_orders",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "ls_bronze",
@@ -13,6 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
+				"folderPath": "orders",
 				"fileSystem": "silver"
 			},
 			"compressionCodec": "snappy"
