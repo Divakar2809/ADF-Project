@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "df_orders_bronze_to_silver",
+				"name": "df_orders_set_bronze_to_silver",
 				"type": "ExecuteDataFlow",
 				"dependsOn": [],
 				"policy": {
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataflow": {
-						"referenceName": "df_orders_bronze_to_silver",
+						"referenceName": "df_orders_set_bronze_to_silver",
 						"type": "DataFlowReference"
 					},
 					"compute": {
