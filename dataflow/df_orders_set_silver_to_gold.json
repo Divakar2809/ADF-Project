@@ -16,13 +16,27 @@
 						"referenceName": "ds_cleansed_order_items",
 						"type": "DatasetReference"
 					},
-					"name": "orderItemsSource"
+					"name": "orderItems"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_structured_orders",
+						"type": "DatasetReference"
+					},
+					"name": "ordersTarget"
+				}
+			],
 			"transformations": [
 				{
-					"name": "ordersJoinOrderItems"
+					"name": "OrderJoinOrderItem"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "selection"
 				}
 			],
 			"scriptLines": [
@@ -48,12 +62,36 @@
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
-				"     format: 'parquet') ~> orderItemsSource",
-				"ordersSource, orderItemsSource join(ERROR_FUNCTION('') == ERROR_FUNCTION(''),",
+				"     format: 'parquet') ~> orderItems",
+				"ordersSource, orderItems join(ordersSource@ORDER_ID == orderItems@ORDER_ID,",
 				"     joinType:'left',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> ordersJoinOrderItems"
+				"     broadcast: 'auto')~> OrderJoinOrderItem",
+				"OrderJoinOrderItem derive(UPDATED_TIMESTAMP = currentUTC(),",
+				"          SUBTOTAL = UNIT_PRICE * QUANTITY) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          ORDER_ID = ordersSource@ORDER_ID,",
+				"          ORDER_DATE,",
+				"          CUSTOMER_ID,",
+				"          ORDER_STATUS,",
+				"          STORE_ID,",
+				"          PRODUCT_ID,",
+				"          UNIT_PRICE,",
+				"          QUANTITY,",
+				"          SUBTOTAL,",
+				"          UPDATED_TIMESTAMP",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> selection",
+				"selection sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'parquet',",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ordersTarget"
 			]
 		}
 	}
