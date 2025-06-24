@@ -33,7 +33,7 @@
 					"name": "OrderJoinOrderItem"
 				},
 				{
-					"name": "derivedColumn1"
+					"name": "derivedColumn"
 				},
 				{
 					"name": "selection"
@@ -69,8 +69,8 @@
 				"     ignoreSpaces: false,",
 				"     broadcast: 'auto')~> OrderJoinOrderItem",
 				"OrderJoinOrderItem derive(UPDATED_TIMESTAMP = currentUTC(),",
-				"          SUBTOTAL = UNIT_PRICE * QUANTITY) ~> derivedColumn1",
-				"derivedColumn1 select(mapColumn(",
+				"          SUBTOTAL = UNIT_PRICE * QUANTITY) ~> derivedColumn",
+				"derivedColumn select(mapColumn(",
 				"          ORDER_ID = ordersSource@ORDER_ID,",
 				"          ORDER_DATE,",
 				"          CUSTOMER_ID,",
