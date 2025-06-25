@@ -17,6 +17,20 @@
 						"type": "DatasetReference"
 					},
 					"name": "productsSource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_structured_orders",
+						"type": "DatasetReference"
+					},
+					"name": "ordersource"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_structured_stores",
+						"type": "DatasetReference"
+					},
+					"name": "storesSource"
 				}
 			],
 			"sinks": [
@@ -26,6 +40,13 @@
 						"type": "DatasetReference"
 					},
 					"name": "ProductOrdersTarget"
+				},
+				{
+					"dataset": {
+						"referenceName": "ds_analytics_store_orders",
+						"type": "DatasetReference"
+					},
+					"name": "storeOrdersTarget"
 				}
 			],
 			"transformations": [
@@ -46,6 +67,21 @@
 				},
 				{
 					"name": "aggregate1"
+				},
+				{
+					"name": "orderJoinStores"
+				},
+				{
+					"name": "cast2"
+				},
+				{
+					"name": "derivedColumn2"
+				},
+				{
+					"name": "select3"
+				},
+				{
+					"name": "aggregate2"
 				}
 			],
 			"scriptLines": [
@@ -75,6 +111,33 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> productsSource",
+				"source(output(",
+				"          ORDER_ID as integer,",
+				"          ORDER_DATE as date,",
+				"          CUSTOMER_ID as integer,",
+				"          ORDER_STATUS as string,",
+				"          STORE_ID as integer,",
+				"          PRODUCT_ID as integer,",
+				"          UNIT_PRICE as double,",
+				"          QUANTITY as integer,",
+				"          SUBTOTAL as double,",
+				"          UPDATED_TIMESTAMP as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ordersource",
+				"source(output(",
+				"          STORE_ID as integer,",
+				"          STORE_NAME as string,",
+				"          LATITUDE as double,",
+				"          LONGITUDE as double,",
+				"          UPDATED_TIMESTAMP as timestamp",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> storesSource",
 				"ordersSource, productsSource join(ordersSource@PRODUCT_ID == productsSource@PRODUCT_ID,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
@@ -106,13 +169,46 @@
 				"          PRODUCT_NAME,",
 				"          MONTH_YEAR),",
 				"     TOTAL_AMOUNT = sum(toDecimal(SUBTOTAL, 10, 2))) ~> aggregate1",
+				"ordersource, storesSource join(ordersource@STORE_ID == storesSource@STORE_ID,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> orderJoinStores",
+				"orderJoinStores cast(output(",
+				"          ORDER_DATE as string",
+				"     ),",
+				"     errors: true) ~> cast2",
+				"cast2 derive(MONTH_YEAR = substring(ORDER_DATE, 6, 2) + '-' + substring(ORDER_DATE, 1, 4)) ~> derivedColumn2",
+				"derivedColumn2 select(mapColumn(",
+				"          STORE_NAME,",
+				"          LATITUDE,",
+				"          LONGITUDE,",
+				"          ORDER_STATUS,",
+				"          MONTH_YEAR,",
+				"          SUBTOTAL",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select3",
+				"select3 aggregate(groupBy(STORE_NAME,",
+				"          LATITUDE,",
+				"          ORDER_STATUS,",
+				"          LONGITUDE,",
+				"          MONTH_YEAR),",
+				"     TOTAL_AMOUNT = sum(toDecimal(SUBTOTAL, 10, 2))) ~> aggregate2",
 				"aggregate1 sink(allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     umask: 0022,",
 				"     preCommands: [],",
 				"     postCommands: [],",
 				"     skipDuplicateMapInputs: true,",
-				"     skipDuplicateMapOutputs: true) ~> ProductOrdersTarget"
+				"     skipDuplicateMapOutputs: true) ~> ProductOrdersTarget",
+				"aggregate2 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> storeOrdersTarget"
 			]
 		}
 	}
