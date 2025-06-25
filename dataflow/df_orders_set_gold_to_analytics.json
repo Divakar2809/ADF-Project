@@ -53,7 +53,7 @@
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> productsSource",
-				"ordersSource, productsSource join(product_id == product_id,",
+				"ordersSource, productsSource join(PRODUCT_ID == productsSource@PRODUCT_ID,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
