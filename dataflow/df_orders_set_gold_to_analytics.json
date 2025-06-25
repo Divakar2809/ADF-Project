@@ -19,10 +19,33 @@
 					"name": "productsSource"
 				}
 			],
-			"sinks": [],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "ds_analytics_product_orders",
+						"type": "DatasetReference"
+					},
+					"name": "ProductOrdersTarget"
+				}
+			],
 			"transformations": [
 				{
 					"name": "innerJoin"
+				},
+				{
+					"name": "select1"
+				},
+				{
+					"name": "cast1"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "select2"
+				},
+				{
+					"name": "aggregate1"
 				}
 			],
 			"scriptLines": [
@@ -43,21 +66,52 @@
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> ordersSource",
 				"source(output(",
-				"          STORE_ID as integer,",
-				"          STORE_NAME as string,",
-				"          LATITUDE as double,",
-				"          LONGITUDE as double,",
+				"          PRODUCT_ID as integer,",
+				"          PRODUCT_NAME as string,",
+				"          UNIT_PRICE as double,",
 				"          UPDATED_TIMESTAMP as timestamp",
 				"     ),",
 				"     allowSchemaDrift: true,",
 				"     validateSchema: false,",
 				"     ignoreNoFilesFound: false,",
 				"     format: 'parquet') ~> productsSource",
-				"ordersSource, productsSource join(PRODUCT_ID == productsSource@PRODUCT_ID,",
+				"ordersSource, productsSource join(ordersSource@PRODUCT_ID == productsSource@PRODUCT_ID,",
 				"     joinType:'inner',",
 				"     matchType:'exact',",
 				"     ignoreSpaces: false,",
-				"     broadcast: 'auto')~> innerJoin"
+				"     broadcast: 'auto')~> innerJoin",
+				"innerJoin select(mapColumn(",
+				"          ORDER_DATE,",
+				"          ORDER_STATUS,",
+				"          SUBTOTAL,",
+				"          PRODUCT_NAME",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select1",
+				"select1 cast(output(",
+				"          ORDER_DATE as string",
+				"     ),",
+				"     errors: true) ~> cast1",
+				"cast1 derive(MONTH_YEAR = toDate(ORDER_DATE, 'MM-yyyy')) ~> derivedColumn1",
+				"derivedColumn1 select(mapColumn(",
+				"          ORDER_STATUS,",
+				"          SUBTOTAL,",
+				"          PRODUCT_NAME,",
+				"          MONTH_YEAR",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> select2",
+				"select2 aggregate(groupBy(ORDER_STATUS,",
+				"          PRODUCT_NAME,",
+				"          MONTH_YEAR),",
+				"     TOTAL_AMOUNT = sum(SUBTOTAL)) ~> aggregate1",
+				"aggregate1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> ProductOrdersTarget"
 			]
 		}
 	}
