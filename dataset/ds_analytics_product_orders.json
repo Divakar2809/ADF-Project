@@ -1,0 +1,27 @@
+{
+	"name": "ds_analytics_product_orders",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_bronze",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "Analytics"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "products_orders_monthly.csv",
+				"folderPath": "product_orders",
+				"fileSystem": "analytics"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
